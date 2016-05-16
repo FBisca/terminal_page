@@ -34,6 +34,8 @@ ul.terminal {
     color: #00a100; }
   ul.terminal li .command-divisor {
     color: white; }
+  ul.terminal li .command-margin {
+    margin-right: 4px; }
   ul.terminal li .output, ul.terminal li .input {
     white-space: pre; }
 

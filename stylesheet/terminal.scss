@@ -54,6 +54,10 @@ ul.terminal {
       color: $terminalSecondaryColor;
     }
 
+    .command-margin {
+      margin-right: 4px;
+    }
+
     .output, .input {
       white-space: pre;
     }

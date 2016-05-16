@@ -55,7 +55,7 @@ Terminal.prototype.startListeningForKeys = function() {
 
 Terminal.prototype.createOutputLine = function(content, info) {
   if (info) {
-    return `<li>${info}<span class="command-divisor">$</span><span class="output">${content}</span></li>`;
+    return `<li>${info}<span class="command-divisor command-margin">$</span><span class="output">${content}</span></li>`;
   } else {
     return `<li><span class="output">${content}</span></li>`;
   }
@@ -107,28 +107,12 @@ Terminal.prototype.onEnterPress = function() {
 
     var terminal = this;
 
-    var objects = [
-      {
-        delay: 200,
-        content: "Help"
-      },
-      {
-        delay: 200,
-        content: "Skills"
-      },
-      {
-        delay: 200,
-        content: "Contacts"
-      }
-    ]
-    this.showOutput(objects);
-/*
     setTimeout(function() {
       terminal.removeInput();
       terminal.clearBuffer();
       terminal.outputLine(`${command}: command not found`);
       terminal.createNewInputLine();
-    }, 1000);*/
+    }, 1000);
   }
 };
 
