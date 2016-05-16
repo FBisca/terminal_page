@@ -17,13 +17,9 @@ function Terminal() {
 
   this.updateCenter = function() {
     if (this.inputBuffer[1]) {
-      $(".cursor").html(this.inputBuffer[1]);
-      $(".cursor").addClass("cursor-selecting");
-      $(".cursor").removeClass("cursor-empty");
+      $(".cursor").addClass("cursor-selecting").removeClass("cursor-empty").html(this.inputBuffer[1]);
     } else {
-      $(".cursor").html("&nbsp;");
-      $(".cursor").addClass("cursor-empty");
-      $(".cursor").removeClass("cursor-selecting");
+      $(".cursor").addClass("cursor-empty").removeClass("cursor-selecting").html("&nbsp;");
     }
   };
 }
