@@ -1,0 +1,75 @@
+$terminalBackgroundColor: #000000;
+$terminalPrimaryColor: rgb(0,228,0);
+$terminalSecondaryColor: rgb(255,255,255);
+$terminalTerciaryColor: rgb(0,161,0);
+$terminalFontFamily: 'Ubuntu Mono', serif;
+
+@-webkit-keyframes blink-cursor-empty {
+  0%,100% { border-color: $terminalPrimaryColor; }
+  50%   { border-color: $terminalBackgroundColor; }
+}
+
+@keyframes blink-cursor-empty {
+  0%,100%   { border-color: $terminalPrimaryColor; }
+  50% { border-color: $terminalBackgroundColor; }
+}
+
+@keyframes blink-cursor-selecting {
+  0%,100%   { background-color: $terminalPrimaryColor; color: $terminalBackgroundColor; }
+  50% { background-color: $terminalBackgroundColor; color: $terminalPrimaryColor; }
+}
+
+@mixin animation($value) {
+  -webkit-animation: $value;
+  -moz-animation: $value;
+  -o-animation: $value;
+  animation: $value;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  min-width: 600px;
+  background-color: $terminalBackgroundColor;
+  color: $terminalPrimaryColor;
+  font-family: $terminalFontFamily;
+  line-height: 18px;
+}
+
+ul.terminal {
+  list-style: none;
+
+  li {
+
+    .secondary {
+      color: $terminalTerciaryColor;
+    }
+
+    .command-divisor {
+      color: $terminalSecondaryColor;
+    }
+
+    .output, .input {
+      white-space: pre;
+    }
+  }
+
+}
+
+.cursor-selecting {
+  @include animation(blink-cursor-selecting 1s infinite steps(1, start));
+  display: inline-block;
+  line-height: 18px;
+}
+
+.cursor-empty {
+  @include animation(blink-cursor-empty 1s infinite steps(1, start));
+  display: inline-block;
+  line-height: 16px;
+  border: 1px solid $terminalPrimaryColor;
+}

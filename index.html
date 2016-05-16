@@ -1,0 +1,31 @@
+<html>
+<head>
+  <link href='https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700' rel='stylesheet' type='text/css'>
+  <link href="stylesheet/terminal.css" rel="stylesheet" type="text/css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+  <script src="js/terminal.js"></script>
+</head>
+<body>
+  <ul class="terminal">
+    <li><br></li><li><br></li>
+    <li><span class="output">    //////////////////////////////////////////////////////////////////////</span></li>
+    <li><span class="output">    //                                                                  //</span></li>
+    <li><span class="output">    //   88,    ,88  888888  88      ,88888  ,8888,  ,88,,88,  888888   //</span></li>
+    <li><span class="output">    //   '88 88 88   88      88      88      88  88  88 88 88  88       //</span></li>
+    <li><span class="output">    //    88 88 88   8888    88      88      88  88  88 88 88  8888     //</span></li>
+    <li><span class="output">    //    88 88 88   88      88      88      88  88  88 88 88  88       //</span></li>
+    <li><span class="output">    //    '888888'   888888  888888  '88888  '8888'  88    88  888888   //</span></li>
+    <li><span class="output">    //                                                                  //</span></li>
+    <li><span class="output">    //////////////////////////////////////////////////////////////////////</span></li>
+    <li><br></li><li><br></li>
+    <li><span class="output">Type "help" to list all available commands.</span></li>
+    <li><br></li>
+  </ul>
+</body>
+</html>
+<script>
+$(document).ready(function(){
+  var terminal = new Terminal();
+  terminal.init("bisca@bisca-pc", "/home/bisca");
+});
+</script>
