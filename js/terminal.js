@@ -1,23 +1,23 @@
 "use strict";
 
 function Terminal() {
-  this.commandBuffer = ["", "", ""];
+  this.inputBuffer = ["", "", ""];
   this.lastCommand = undefined;
-  this.commands = ["about", "help", "clear", "contact", "projects", "skills"];
+  this.commands = ["sobre", "help", "clear", "contact", "projects", "skills", "abacate", "abacaxi", "aba"];
   this.computer = undefined;
   this.directory = undefined;
 
   this.updatePrev = function() {
-    $(".cursor").prev(".input").html(this.commandBuffer[0]);
+    $(".cursor").prev(".input").html(this.inputBuffer[0]);
   };
 
   this.updateNext = function() {
-    $(".cursor").next(".input").html(this.commandBuffer[2]);
+    $(".cursor").next(".input").html(this.inputBuffer[2]);
   };
 
   this.updateCenter = function() {
-    if (this.commandBuffer[1]) {
-      $(".cursor").html(this.commandBuffer[1]);
+    if (this.inputBuffer[1]) {
+      $(".cursor").html(this.inputBuffer[1]);
       $(".cursor").addClass("cursor-selecting");
       $(".cursor").removeClass("cursor-empty");
     } else {
@@ -100,15 +100,68 @@ Terminal.prototype.onKeyPressed = function(event) {
 };
 
 Terminal.prototype.onEnterPress = function() {
-  var command = this.commandBuffer.join("");
+  var command = this.inputBuffer.join("");
   if (command) {
-    $(".input").parent(".output").html(command);
+    this.fixInputAsOutput();
+    this.inputWaitingResponse();
 
-    this.outputLine(`${command}: command not found`);
-    this.createNewInputLine();
-    this.clearInput();
+    var terminal = this;
+
+    var objects = [
+      {
+        delay: 200,
+        content: "Help"
+      },
+      {
+        delay: 200,
+        content: "Skills"
+      },
+      {
+        delay: 200,
+        content: "Contacts"
+      }
+    ]
+    this.showOutput(objects);
+/*
+    setTimeout(function() {
+      terminal.removeInput();
+      terminal.clearBuffer();
+      terminal.outputLine(`${command}: command not found`);
+      terminal.createNewInputLine();
+    }, 1000);*/
   }
 };
+
+Terminal.prototype.showOutput = function(outputArray) {
+  this.removeInput();
+  this.clearBuffer();
+
+  var delay = 0;
+  var terminal = this;
+  for (var i = 0; i < outputArray.length; i++) {
+    var obj = outputArray[i];
+    delay += obj.delay;
+    setTimeout(function() {
+      terminal.outputLine(obj.content);
+    }, delay);
+  }
+
+  setTimeout(function() {
+    terminal.createNewInputLine();
+  }, delay + 1);
+}
+
+Terminal.prototype.fixInputAsOutput = function() {
+  $(".input").parent(".output").html($(".input").text());
+}
+
+Terminal.prototype.inputWaitingResponse = function() {
+  $(".terminal").append(this.createInputLine());
+}
+
+Terminal.prototype.removeInput = function() {
+  $(".input").remove();
+}
 
 Terminal.prototype.outputLine = function(content) {
   var newLine = this.createOutputLine(content);
@@ -121,34 +174,34 @@ Terminal.prototype.createNewInputLine = function() {
   $(".terminal").append(newLine);
 };
 
-Terminal.prototype.clearInput = function() {
-  this.commandBuffer = ["","",""];
+Terminal.prototype.clearBuffer = function() {
+  this.inputBuffer = ["","",""];
   this.updatePrev();
   this.updateCenter();
   this.updateNext();
 };
 
 Terminal.prototype.onBackPress = function() {
-  if (this.commandBuffer[1] && this.commandBuffer[1].length > 1) {
-    if (this.commandBuffer[2].length > 0) {
-      this.commandBuffer[1] = this.commandBuffer[2].substring(0, 1);
+  if (this.inputBuffer[1] && this.inputBuffer[1].length > 1) {
+    if (this.inputBuffer[2].length > 0) {
+      this.inputBuffer[1] = this.inputBuffer[2].substring(0, 1);
       this.updateCenter();
 
-      this.commandBuffer[2] = this.commandBuffer[2].substring(1);
+      this.inputBuffer[2] = this.inputBuffer[2].substring(1);
       this.updateNext();
     } else {
-      this.commandBuffer[1] = "";
+      this.inputBuffer[1] = "";
       this.updateCenter();
     }
-  } else if (this.commandBuffer[0]) {
-    this.commandBuffer[0] = this.commandBuffer[0].substring(0,
-      this.commandBuffer[0].length - 1);
+  } else if (this.inputBuffer[0]) {
+    this.inputBuffer[0] = this.inputBuffer[0].substring(0,
+      this.inputBuffer[0].length - 1);
     this.updatePrev()
   }
 };
 
 Terminal.prototype.onTabPress = function() {
-  var currentCommand = this.commandBuffer[0];
+  var currentCommand = this.inputBuffer[0];
   var foundCommands = [];
   for (var i = 0; i < this.commands.length; i++) {
     var command = this.commands[i];
@@ -158,23 +211,54 @@ Terminal.prototype.onTabPress = function() {
   }
 
   if (foundCommands.length == 1) {
-    this.commandBuffer[0] = foundCommands[0];
+    this.inputBuffer[0] = foundCommands[0];
     this.updatePrev();
-  } else {
+  } else if (foundCommands.length >= 2) {
+    var stop = false;
+    var i = currentCommand.length;
 
+    while (!stop) {
+      var char = undefined;
+
+      for (var j = 0; j < foundCommands.length; j++) {
+        var foundCommand = foundCommands[j];
+
+        if (foundCommand.length > i) {
+          if (char == undefined) {
+            char = foundCommand.charAt(i);
+          } else if (char != foundCommand.charAt(i)) {
+            stop = true;
+            break;
+          }
+        } else {
+          stop = true;
+          break;
+        }
+
+      }
+
+      if (!stop) {
+        currentCommand += char;
+      }
+
+      i++;
+    }
+
+    this.inputBuffer[0] = currentCommand;
+    this.updatePrev();
   }
 };
 
 Terminal.prototype.onDeletePress = function() {
-  if (this.commandBuffer[1]) {
-    if (this.commandBuffer[2]) {
-      this.commandBuffer[1] = this.commandBuffer[2].substring(0, 1);
+  if (this.inputBuffer[1]) {
+    if (this.inputBuffer[2]) {
+      this.inputBuffer[1] = this.inputBuffer[2].substring(0, 1);
       this.updateCenter();
 
-      this.commandBuffer[2] = this.commandBuffer[2].substring(1);
+      this.inputBuffer[2] = this.inputBuffer[2].substring(1);
       this.updateNext();
     } else {
-      this.commandBuffer[1] = "";
+      this.inputBuffer[1] = "";
       this.updateCenter();
     }
 
@@ -182,69 +266,69 @@ Terminal.prototype.onDeletePress = function() {
 };
 
 Terminal.prototype.onCharTyped = function(charCode) {
-  this.commandBuffer[0] += charCode;
+  this.inputBuffer[0] += charCode;
   this.updatePrev()
 };
 
 Terminal.prototype.onLeftArrowPress = function(shiftPressed) {
-  if (this.lastCommand == 39 && this.commandBuffer[1]) {
-    this.commandBuffer[2] = this.commandBuffer[1] + this.commandBuffer[2];
-    this.commandBuffer[1] = ""
+  if (this.lastCommand == 39 && this.inputBuffer[1]) {
+    this.inputBuffer[2] = this.inputBuffer[1] + this.inputBuffer[2];
+    this.inputBuffer[1] = ""
 
     this.updateNext();
   }
 
-  if (this.commandBuffer[0]) {
-    var lastChar = this.commandBuffer[0].substring(
-      this.commandBuffer[0].length - 1, this.commandBuffer[0].length);
+  if (this.inputBuffer[0]) {
+    var lastChar = this.inputBuffer[0].substring(
+      this.inputBuffer[0].length - 1, this.inputBuffer[0].length);
 
-    this.commandBuffer[0] = this.commandBuffer[0].substring(0,
-      this.commandBuffer[0].length - 1);
+    this.inputBuffer[0] = this.inputBuffer[0].substring(0,
+      this.inputBuffer[0].length - 1);
     this.updatePrev();
 
     if (shiftPressed) {
-      this.commandBuffer[1] = lastChar + this.commandBuffer[1];
+      this.inputBuffer[1] = lastChar + this.inputBuffer[1];
       this.updateCenter();
 
     } else {
-      this.commandBuffer[2] = this.commandBuffer[1] + this.commandBuffer[2];
+      this.inputBuffer[2] = this.inputBuffer[1] + this.inputBuffer[2];
       this.updateNext();
 
-      this.commandBuffer[1] = lastChar;
+      this.inputBuffer[1] = lastChar;
       this.updateCenter();
     }
   }
 };
 
 Terminal.prototype.onRightArrowPress = function(shiftPressed) {
-  if (this.lastCommand == 37 && this.commandBuffer[1]) {
-    this.commandBuffer[0] += this.commandBuffer[1];
-    this.commandBuffer[1] = ""
+  if (this.lastCommand == 37 && this.inputBuffer[1]) {
+    this.inputBuffer[0] += this.inputBuffer[1];
+    this.inputBuffer[1] = ""
 
     this.updatePrev();
   }
 
-  if (this.commandBuffer[2]) {
-    var firstChar = this.commandBuffer[2].substring(0, 1);
-    this.commandBuffer[2] = this.commandBuffer[2].substring(1);
+  if (this.inputBuffer[2]) {
+    var firstChar = this.inputBuffer[2].substring(0, 1);
+    this.inputBuffer[2] = this.inputBuffer[2].substring(1);
     this.updateNext();
 
     if (shiftPressed) {
-      this.commandBuffer[1] += firstChar;
+      this.inputBuffer[1] += firstChar;
       this.updateCenter();
 
     } else {
-      this.commandBuffer[0] += this.commandBuffer[1];
+      this.inputBuffer[0] += this.inputBuffer[1];
       this.updatePrev();
 
-      this.commandBuffer[1] = firstChar;
+      this.inputBuffer[1] = firstChar;
       this.updateCenter();
     }
   } else {
-    this.commandBuffer[0] += this.commandBuffer[1]
+    this.inputBuffer[0] += this.inputBuffer[1]
     this.updatePrev();
 
-    this.commandBuffer[1] = "";
+    this.inputBuffer[1] = "";
     this.updateCenter();
   }
 };
