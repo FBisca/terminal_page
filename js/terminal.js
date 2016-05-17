@@ -28,10 +28,10 @@ Terminal.prototype.init = function(computer, directory) {
   this.computer = computer;
   this.directory = directory;
 
-  var infoText = this.createInfoLine(computer, directory);
-  var initText = this.createOutputLine(this.createInputLine(), infoText);
+  var info = this.createInfoText(computer, directory);
+  var inputLine = this.createInputLine(info);
 
-  $(".terminal").append(initText);
+  this.appendTerminal(inputLine);
 
   this.startListeningForKeys();
 }
@@ -57,12 +57,35 @@ Terminal.prototype.createOutputLine = function(content, info) {
   }
 }
 
-Terminal.prototype.createInfoLine = function(computer, directory) {
+Terminal.prototype.createInputLine = function(info) {
+  $(".input").remove();
+
+  var inputLine = '<span class="input"></span><span class="input cursor cursor-empty">&nbsp;</span><span class="input"></span>';
+  if (info) {
+    return `<li>${info}<span class="command-divisor command-margin">$</span>${inputLine}</li>`;
+  } else {
+    return `<li>${inputLine}</li>`;
+  }
+}
+
+Terminal.prototype.createInfoText = function(computer, directory) {
   return `<span class="secondary">${computer}</span><span class="command-divisor">:</span><span>${directory}</span>`;
 }
 
-Terminal.prototype.createInputLine = function() {
-  return '<span class="input"></span><span class="input cursor cursor-empty">&nbsp;</span><span class="input"></span>';
+Terminal.prototype.appendTerminal = function(text) {
+  $("li").last().after(text);
+}
+
+Terminal.prototype.log = function(text) {
+  var output = this.createOutputLine(text);
+  this.appendTerminal(output);
+}
+
+Terminal.prototype.fixInput = function() {
+  var content = `<span class="output">${$(".input").text()}</span>`;
+
+  $(".input").parent("li").append(content);
+  $(".input").remove();
 }
 
 Terminal.prototype.onKeyPressed = function(event) {
@@ -86,9 +109,11 @@ Terminal.prototype.onKeyPressed = function(event) {
       this.onDeletePress();
       return true;
     default:
-      if (event.charCode) {
-        this.onCharTyped(String.fromCharCode(event.charCode));
-        return true;
+      if (!event.ctrlKey) {
+        if (event.charCode) {
+          this.onCharTyped(String.fromCharCode(event.charCode));
+          return true;
+        }
       }
   }
 
@@ -98,60 +123,20 @@ Terminal.prototype.onKeyPressed = function(event) {
 Terminal.prototype.onEnterPress = function() {
   var command = this.inputBuffer.join("");
   if (command) {
-    this.fixInputAsOutput();
-    this.inputWaitingResponse();
+    this.fixInput();
+    this.appendTerminal(this.createInputLine());
 
     var terminal = this;
-
     setTimeout(function() {
-      terminal.removeInput();
+
       terminal.clearBuffer();
-      terminal.outputLine(`${command}: command not found`);
-      terminal.createNewInputLine();
+
+      terminal.log(`${command}: command not found`);
+
+      var info = terminal.createInfoText(terminal.computer, terminal.directory);
+      terminal.appendTerminal(terminal.createInputLine(info));
     }, 1000);
   }
-};
-
-Terminal.prototype.showOutput = function(outputArray) {
-  this.removeInput();
-  this.clearBuffer();
-
-  var delay = 0;
-  var terminal = this;
-  for (var i = 0; i < outputArray.length; i++) {
-    var obj = outputArray[i];
-    delay += obj.delay;
-    setTimeout(function() {
-      terminal.outputLine(obj.content);
-    }, delay);
-  }
-
-  setTimeout(function() {
-    terminal.createNewInputLine();
-  }, delay + 1);
-}
-
-Terminal.prototype.fixInputAsOutput = function() {
-  $(".input").parent(".output").html($(".input").text());
-}
-
-Terminal.prototype.inputWaitingResponse = function() {
-  $(".terminal").append(this.createInputLine());
-}
-
-Terminal.prototype.removeInput = function() {
-  $(".input").remove();
-}
-
-Terminal.prototype.outputLine = function(content) {
-  var newLine = this.createOutputLine(content);
-  $(".terminal").append(newLine);
-};
-
-Terminal.prototype.createNewInputLine = function() {
-  var infoText = this.createInfoLine(this.computer, this.directory);
-  var newLine = this.createOutputLine(this.createInputLine(), infoText);
-  $(".terminal").append(newLine);
 };
 
 Terminal.prototype.clearBuffer = function() {
