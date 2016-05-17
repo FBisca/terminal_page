@@ -22,7 +22,7 @@ Terminal.prototype.init = function(computer, directory) {
 Terminal.prototype.startListeningForKeys = function() {
   var terminal = this;
 
-  $(document).keypress(function(event) {
+  window.addEventListener("keydown", function(event) {
     var consumed = terminal.onKeyPressed(event);
     if (consumed) {
       event.preventDefault();
@@ -117,10 +117,24 @@ Terminal.prototype.onKeyPressed = function(event) {
       return true;
     default:
       if (!event.ctrlKey) {
+        var charTyped;
+
         if (event.charCode) {
-          this.inputBuffer.onCharTyped(String.fromCharCode(event.charCode));
+          charTyped = String.fromCharCode(event.charCode);
+        } else {
+          charTyped = String.fromCharCode(event.keyCode);
+          if (event.shiftKey) {
+            charTyped = charTyped.toUpperCase();
+          } else {
+            charTyped = charTyped.toLowerCase();
+          }
+        }
+
+        if (charTyped) {
+          this.inputBuffer.onCharTyped(charTyped);
           return true;
         }
+
       }
   }
 
