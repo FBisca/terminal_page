@@ -185,6 +185,9 @@ Terminal.prototype.isPredefined = function(command) {
     case "clear":
       this.clear();
       return true;
+    case "exit":
+      window.history.back();
+      return true;
   }
 
   return false;
@@ -192,6 +195,9 @@ Terminal.prototype.isPredefined = function(command) {
 
 Terminal.prototype.clear = function() {
   $(".terminal").empty();
+
+  this.inputBuffer.clear();
+
   var info = this.createInfoText(this.computer, this.directory);
   this.appendTerminal(this.createInputLine(info));
 }
