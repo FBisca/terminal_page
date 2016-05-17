@@ -2,6 +2,7 @@
 
 function Terminal() {
   this.inputBuffer = new InputBuffer(this);
+  this.outputManager = new OutputManager();
   this.computer = undefined;
   this.directory = undefined;
 }
@@ -55,7 +56,8 @@ Terminal.prototype.createInfoText = function(computer, directory) {
 }
 
 Terminal.prototype.appendTerminal = function(text) {
-  $("li").last().after(text);
+  $(".terminal").append(text);
+  window.scrollTo(0, document.body.scrollHeight);
 }
 
 Terminal.prototype.log = function(text) {
@@ -101,8 +103,14 @@ Terminal.prototype.onKeyPressed = function(event) {
     case 37: // Left Arrow
       this.inputBuffer.onLeftArrowPress(event.shiftKey);
       return true;
+    case 38: // Up Arrow
+      this.inputBuffer.onUpArrowPress();
+      return true;
     case 39: // Right Arrow
       this.inputBuffer.onRightArrowPress(event.shiftKey);
+      return true;
+    case 40: // Down Arrow
+      this.inputBuffer.onDownArrowPress();
       return true;
     case 46: // Delete
       this.inputBuffer.onDeletePress();
@@ -118,3 +126,72 @@ Terminal.prototype.onKeyPressed = function(event) {
 
   return false;
 };
+
+Terminal.prototype.onCommandEntered = function(command) {
+  var outputs = this.outputManager.outputs;
+  if (this.isPredefined(command)) {
+    return;
+  }
+
+  for (var i = 0; i < outputs.length; i++) {
+    if (outputs[i].command == command) {
+        this.onCommandFound(outputs[i]);
+        return;
+    }
+  }
+  this.onCommandNotFound(command);
+}
+
+Terminal.prototype.onCommandFound = function(output) {
+  this.printOutputDelayed(0, output.lines);
+}
+
+Terminal.prototype.printOutputDelayed = function(index, lines) {
+  if (index >= lines.length) {
+    var info = this.createInfoText(this.computer, this.directory);
+    this.appendTerminal(this.createInputLine(info));
+    return;
+  } else if (index == 0) {
+    this.fixInput();
+    this.inputBuffer.clear();
+  }
+  var line = lines[index];
+  this.log(line.text);
+
+  var terminal = this;
+  setTimeout(function() {
+    terminal.printOutputDelayed(index + 1, lines);
+  }, line.delay);
+}
+
+Terminal.prototype.onCommandNotFound = function(command) {
+  this.fixInput();
+  this.appendTerminal(this.createInputLine());
+
+  var terminal = this;
+  var inputBuffer = this.inputBuffer;
+  setTimeout(function() {
+
+    inputBuffer.clear();
+    terminal.log(`${command}: command not found`);
+
+    var info = terminal.createInfoText(terminal.computer, terminal.directory);
+    terminal.appendTerminal(terminal.createInputLine(info));
+  }, 600);
+}
+
+Terminal.prototype.isPredefined = function(command) {
+  switch (command) {
+    case "clear":
+      this.clear();
+      return true;
+  }
+
+  return false;
+}
+
+Terminal.prototype.clear = function() {
+  $(".terminal").empty();
+  var info = this.createInfoText(this.computer, this.directory);
+  this.appendTerminal(this.createInputLine(info));
+}
